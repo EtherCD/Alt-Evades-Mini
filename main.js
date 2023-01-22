@@ -59,19 +59,19 @@ const player = {
         let shiftCoef = this.movement.shift ? 0.5 : 1
         if (!this.movement.mouse) {
             if (this.movement.top)
-                this.y -= (this.speed / 4) * shiftCoef
+                this.y -= (this.speed / 2) * shiftCoef
             if (this.movement.down)
-                this.y += (this.speed / 4) * shiftCoef
+                this.y += (this.speed / 2) * shiftCoef
             if (this.movement.left)
-                this.x -= (this.speed / 4) * shiftCoef
+                this.x -= (this.speed / 2) * shiftCoef
             if (this.movement.right)
-                this.x += (this.speed / 4) * shiftCoef
+                this.x += (this.speed / 2) * shiftCoef
         }
         if (this.movement.mouse) {
             let angle = Math.atan2(this.movement.mouY, this.movement.mouX)
             let distance = this.d(0, 0, this.movement.mouX, this.movement.mouY) / 15
-            let speedX = (Math.cos(angle) * (Math.min(this.speed / 2, distance) * shiftCoef) / 2)
-            let speedY = (Math.sin(angle) * (Math.min(this.speed / 2, distance) * shiftCoef) / 2)
+            let speedX = (Math.cos(angle) * (Math.min(this.speed, distance) * shiftCoef) / 2)
+            let speedY = (Math.sin(angle) * (Math.min(this.speed, distance) * shiftCoef) / 2)
             this.x += speedX
             this.y += speedY
         }
@@ -349,17 +349,13 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
                 player.y = this.translate.y*/
             let side = this.checkSide(p)
             if (side == "left") {
-                p.x = this.translate.x + p.radius + 1
-                p.y = this.translate.y + (p.y - this.y)
+                p.x = this.translate.x + p.radius + 1 + 60
             } else if (side == "right") {
-                p.x = this.translate.x + this.translate.w - p.radius - 1
-                p.y = this.translate.y + (p.y - this.y)
+                p.x = (this.translate.x + this.translate.w - 60) - p.radius - 1
             } else if (side == "top") {
-                p.x = this.translate.x + (p.x - this.x)
-                p.y = this.translate.y + p.radius + 1
+                p.y = (this.translate.y + p.radius- 60) + 1
             } else if (side == "down") {
-                p.x = this.translate.x + (p.x - this.x)
-                p.y = this.translate.y + this.translate.h - p.radius - 1
+                p.y = (this.translate.y + this.translate.h - 60) - p.radius - 1
             }
         }
     }
@@ -415,11 +411,13 @@ const MAP = {
     height: 15,
     zones: [],
     enemies: [],
+    tileColor: "",
     init: function (map) {
         this.arrayMap = map
         this.width = map[this.area].properties.size.width
         this.height = map[this.area].properties.size.height
         this.backgroundColor = parse(this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle).values
+        this.tileColor = combineColors(this.backgroundColor, [0, 0, 0, 0.2]);
         for (let i in map[this.area].zones) {
             this.zones[i] = new Zone({
                 x: map[this.area].zones[i].x,
@@ -474,13 +472,11 @@ const MAP = {
             size.height * this.tile,
             this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle
         )
-        let color = combineColors(this.backgroundColor, [0, 0, 0, 0.2]);
-        console.log(this.backgroundColor)
         for (let g = 0; g < size.width; g++) {
-            screen.drawLine(g * this.tile + screen.offX - 10, screen.offY - 10, g * this.tile + screen.offX - 10, size.height * this.tile + screen.offY - 10, color, 2.5)
+            screen.drawLine(g * this.tile + screen.offX - 10, screen.offY - 10, g * this.tile + screen.offX - 10, size.height * this.tile + screen.offY - 10, this.tileColor, 2.5)
         }
         for (let g = 0; g < size.height; g++) {
-            screen.drawLine(screen.offX - 10, g * this.tile, size.width * this.tile + screen.offX - 10, g * this.tile, color, 2.5)
+            screen.drawLine(screen.offX - 10, g * this.tile, size.width * this.tile + screen.offX - 10, g * this.tile, this.tileColor, 2.5)
         }
         for (let zone in this.zones) {
             this.zones[zone].draw()
