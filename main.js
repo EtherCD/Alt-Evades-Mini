@@ -70,8 +70,8 @@ const player = {
         if (this.movement.mouse) {
             let angle = Math.atan2(this.movement.mouY, this.movement.mouX)
             let distance = this.d(0, 0, this.movement.mouX, this.movement.mouY) / 15
-            let speedX = (Math.cos(angle) * (Math.min(this.speed/2, distance) * shiftCoef) / 2)
-            let speedY = (Math.sin(angle) * (Math.min(this.speed/2, distance) * shiftCoef) / 2)
+            let speedX = (Math.cos(angle) * (Math.min(this.speed / 2, distance) * shiftCoef) / 2)
+            let speedY = (Math.sin(angle) * (Math.min(this.speed / 2, distance) * shiftCoef) / 2)
             this.x += speedX
             this.y += speedY
         }
@@ -174,19 +174,16 @@ function Enemie({ x, y, w, h, radius, speed }) {
 
 function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
     this.type = type
-    this.handlingType = function (element) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * 30 } else if (element.endsWith('tn')) { return MAP.arrayMap[MAP.area].properties.size.width * 30 - (element.slice(0, -2) * 30) } else return eval(translate.x) } else { return translate.x } }
-    if (w) {
-        this.w = this.handlingType(w)
-    }
-    if (h) {
-        this.h = this.handlingType(h)
-    }
-    if (x) {
-        this.x = this.handlingType(x)
-    }
-    if (y) {
-        this.y = this.handlingType(y)
-    }
+    this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
+    if (w)
+        this.w = this.handlingType(w, MAP.width)
+    if (h)
+        this.h = this.handlingType(h, MAP.height)
+    if (x)
+        this.x = this.handlingType(x, MAP.width)
+    if (y)
+        this.y = this.handlingType(y, MAP.height)
+
     if (type == "spawner") {
         for (let e in Enemies) {
             for (let i = 0; i < Enemies[e].amount; i++) {
@@ -216,13 +213,13 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
     this.translate = translate
     if (type == "teleport") {
         if (translate.w)
-            this.translate.w = this.handlingType(translate.w)
+            this.translate.w = this.handlingType(translate.w, MAP.width)
         if (translate.h)
-            this.translate.h = this.handlingType(translate.h)
+            this.translate.h = this.handlingType(translate.h, MAP.height)
         if (translate.x)
-            this.translate.x = this.handlingType(translate.x)
+            this.translate.x = this.handlingType(translate.x, MAP.width)
         if (translate.y)
-            this.translate.y = this.handlingType(translate.y)
+            this.translate.y = this.handlingType(translate.y, MAP.height)
     }
     this.lineal = function (a, b, c) {
         return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) < 0
@@ -414,10 +411,15 @@ const MAP = {
     area: 1,
     tile: 30,
     worldName: world_name,
+    width: 80,
+    height: 15,
     zones: [],
     enemies: [],
     init: function (map) {
         this.arrayMap = map
+        this.width = map[this.area].properties.size.width
+        this.height = map[this.area].properties.size.height
+        this.backgroundColor = parse(this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle).values
         for (let i in map[this.area].zones) {
             this.zones[i] = new Zone({
                 x: map[this.area].zones[i].x,
@@ -437,10 +439,10 @@ const MAP = {
         }
         if (
             player.x + player.radius >
-            this.arrayMap[this.area].properties.size.width * this.tile
+            this.width * this.tile
         ) {
             player.x =
-                this.arrayMap[this.area].properties.size.width * this.tile -
+                this.width * this.tile -
                 player.radius
         }
         if (player.y - player.radius < 0) {
@@ -448,10 +450,10 @@ const MAP = {
         }
         if (
             player.y + player.radius >
-            this.arrayMap[this.area].properties.size.height * this.tile
+            this.height * this.tile
         ) {
             player.y =
-                this.arrayMap[this.area].properties.size.height * this.tile -
+                this.height * this.tile -
                 player.radius
         }
         for (let zone in this.zones) {
@@ -468,17 +470,17 @@ const MAP = {
         let size = this.arrayMap[this.area].properties.size
         screen.drawRect(0,
             0,
-            size.width * 30,
-            size.height * 30,
+            size.width * this.tile,
+            size.height * this.tile,
             this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle
         )
-        //let backgroundColor = parseCssColor(this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle)
-        //let color = combineColors(backgroundColor, [255, 255, 255, 0.5]);
+        let color = combineColors(this.backgroundColor, [0, 0, 0, 0.2]);
+        console.log(this.backgroundColor)
         for (let g = 0; g < size.width; g++) {
-            screen.drawLine(g * 30 + screen.offX - 10, screen.offY - 10, g * 30 + screen.offX - 10, size.height * 30 + screen.offY - 10, "rgba(0,0,0,0.2)", 2.5)
+            screen.drawLine(g * this.tile + screen.offX - 10, screen.offY - 10, g * this.tile + screen.offX - 10, size.height * this.tile + screen.offY - 10, color, 2.5)
         }
         for (let g = 0; g < size.height; g++) {
-            screen.drawLine(screen.offX - 10, g * 30, size.width * 30 + screen.offX - 10, g * 30, "rgba(0,0,0,0.2)", 2.5)
+            screen.drawLine(screen.offX - 10, g * this.tile, size.width * this.tile + screen.offX - 10, g * this.tile, color, 2.5)
         }
         for (let zone in this.zones) {
             this.zones[zone].draw()

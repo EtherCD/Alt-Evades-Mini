@@ -95,6 +95,7 @@
         }
 
         function combineColors(bg, color) {
+            if (bg == undefined) return
             var a = color[3];
             var r = Math.round((1 - a) * bg[0] + a * color[0]);
             var g = Math.round((1 - a) * bg[1] + a * color[1]);
@@ -228,7 +229,7 @@
         }
     </script>
     <script type="text/javascript" src="./yaml.min.js"></script>
-    <script src="https://unpkg.com/parse-css-color"></script>
+    <script type="text/javascript" src="./color-parse.js"></script>
 </head>
 
 <body>
@@ -241,6 +242,13 @@
         </div>
         <div id="change-log">
             <dt id="changes">Change log</dt>
+            <hr>
+            <br>
+            <dt id="update">Обновление 1.7.6<br> 22-01-2023</dt>
+            <hr>
+            <li>Уменьшин код (было 610 сток, стало 511)</li>
+            <li>Пофикшен баг вызванный уменьшением кода ;/</li>
+            <li>Больше цвет тайлов не налаживатся ;0</li>
             <hr>
             <br>
             <dt id="update">Обновление 1.7.5 <br> 22-01-2023</dt>
@@ -295,7 +303,7 @@
                         else world_name = selectedFile.name.slice(0, -4)
                         var newArr = YAML.parse(lines);
                         map = newArr
-                    }
+                    }   
                     //MAP.worldName =
                 };
                 fr.readAsText(selectedFile);
