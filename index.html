@@ -104,6 +104,14 @@
             return 'rgb(' + color + ')';
         }
 
+        function mixColors(t, e) {
+            var i = t[3] / 255;
+            var a = e[3] / 255;
+            var n = [];
+            var r = 1 - (1 - a) * (1 - i);
+            return n[0] = Math.round(e[0] * a / r + t[0] * i * (1 - a) / r), n[1] = Math.round(e[1] * a / r + t[1] * i * (1 - a) / r), n[2] = Math.round(e[2] * a / r + t[2] * i * (1 - a) / r), n[3] = r, n
+        }
+
         let world_name = "Tset"
         let map = {
             "1": {
@@ -137,8 +145,10 @@
                         "h": "15t",
                         "tpArea": "_next",
                         "translate": {
-                            "x": "4t",
-                            "y": "0t"
+                            "x": "0t",
+                            "y": "0t",
+                            "w": "2t",
+                            "h": "15t"
                         }
                     }
                 ],
@@ -187,8 +197,10 @@
                         "tpArea": "_prev",
                         "translate": {
                             "x": "4tn",
-                            "y": "0t"
-                        }
+                            "y": "0t",
+                            "w": "2t",
+                            "h": "15t"
+                        },
                     },
                     {
                         "type": "save",
@@ -236,7 +248,7 @@
     <div id="menu">
         <div id="centered">
             <h1>Alt-Evades (Mini)</h1>
-            <p>Viewer in beta! Version: 0.7.7</p>
+            <p>Viewer in beta! Version: 0.7.8</p>
             <input type="file" id="input">
             <button id="play">Play</button>
         </div>
@@ -244,16 +256,23 @@
             <dt id="changes">Change log</dt>
             <hr>
             <br>
+            <dt id="update">Обновление 0.7.8<br> 22-01-2023</dt>
+            <hr>
+            <li>Еще одно сокращение кода (было 512 - стало 451 строк)</li>
+            <li>Зато без багов ;)</li>
+            <li>Новый хот кей: V - отключение столкновений</li>
+            <li>Новая тест способность: Inertia (кнопка Z): постепенно ускоряет игрока, но после 30 скорости сбрасывает ёе</li>
+            <hr>
+            <br>
             <dt id="update">Обновление 0.7.7<br> 22-01-2023</dt>
             <hr>
             <li>Повышина скорость игрока было 17/4 - стало 17/2</li>
             <li>Отныне работает телепорт, но может остались баги...</li>
-            </li>
             <hr>
             <br>
             <dt id="update">Обновление 0.7.6<br> 22-01-2023</dt>
             <hr>
-            <li>Уменьшин код (было 610 сток, стало 511)</li>
+            <li>Уменьшин код (было 610, стало 511 сток)</li>
             <li>Пофикшен баг вызванный уменьшением кода ;/</li>
             <li>Больше цвет тайлов не налаживатся ;0</li>
             <hr>
@@ -310,7 +329,7 @@
                         else world_name = selectedFile.name.slice(0, -4)
                         var newArr = YAML.parse(lines);
                         map = newArr
-                    }   
+                    }
                     //MAP.worldName =
                 };
                 fr.readAsText(selectedFile);

@@ -53,19 +53,28 @@ const player = {
         "left": false, "right": false,
         "top": false, "down": false,
         "shift": false, "mouse": false,
-        "mouX": 0, "mouY": 0
+        "mouX": 0, "mouY": 0,
+        "z": false
     },
+    firstAbilityTimer: 0,
+    color: [255,0,0,1],
+    noColide: false,
     move: function () {
         let shiftCoef = this.movement.shift ? 0.5 : 1
+        let move = false
         if (!this.movement.mouse) {
-            if (this.movement.top)
-                this.y -= (this.speed / 2) * shiftCoef
-            if (this.movement.down)
-                this.y += (this.speed / 2) * shiftCoef
-            if (this.movement.left)
-                this.x -= (this.speed / 2) * shiftCoef
-            if (this.movement.right)
-                this.x += (this.speed / 2) * shiftCoef
+            if (this.movement.top) {
+                this.y -= (this.speed / 2) * shiftCoef; move=true
+            }
+            if (this.movement.down) {
+                this.y += (this.speed / 2) * shiftCoef; move=true
+            }
+            if (this.movement.left) {
+                this.x -= (this.speed / 2) * shiftCoef; move=true
+            }
+            if (this.movement.right) {
+                this.x += (this.speed / 2) * shiftCoef; move=true
+            }
         }
         if (this.movement.mouse) {
             let angle = Math.atan2(this.movement.mouY, this.movement.mouX)
@@ -74,13 +83,16 @@ const player = {
             let speedY = (Math.sin(angle) * (Math.min(this.speed, distance) * shiftCoef) / 2)
             this.x += speedX
             this.y += speedY
+            move=true
         }
+        return move
     },
     d: function (x1, y1, x2, y2) {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
     },
     initKeys: function () {
         document.addEventListener("keydown", (event) => {
+            console.log(event.keyCode)
             if (!event.repeat) {
                 if (event.keyCode == 87 || event.keyCode == 38)
                     player.movement.top = true
@@ -92,6 +104,19 @@ const player = {
                     player.movement.right = true
                 if (event.keyCode == 16)
                     player.movement.shift = true
+                if (event.keyCode == 86) {
+                    player.noColide = !player.noColide
+                    if (player.noColide)
+                        player.color = mixColors([255,0,0,255], [117,28,160,159])
+                    else player.color=[255,0,0,1]
+                }
+                if (event.keyCode == 90) {
+                    player.movement.z = !player.movement.z
+                    if (!player.movement.z) {
+                        player.speed = 17
+                        this.firstAbilityTimer=0
+                    }
+                }
                 if (event.keyCode == 69 && MAP.arrayMap[MAP.area - 1] != undefined) {
                     MAP.changeArea(MAP.area - 1)
                     this.x = 150
@@ -126,10 +151,15 @@ const player = {
         })
     },
     update: function () {
-        this.move()
+        let move = this.move()
+        if (!move || this.speed > 30) {this.firstAbilityTimer=0; this.speed=17}
+        if (this.movement.z && move) {
+            this.firstAbilityTimer += 1/500
+            this.speed += this.firstAbilityTimer
+        }
     },
     draw: function () {
-        screen.drawCircle(this.x, this.y, this.radius, "red")
+        screen.drawCircle(this.x, this.y, this.radius, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.color[3]})`)
     }
 }
 
@@ -226,83 +256,26 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
     }
     this.interactPlayer = function (player) {
         let { x: x1, y: y1, radius } = player
-        if (this.checkOverlap(player.radius, player.x, player.y, this.x, this.y, this.w, this.h)) {
-            if (
-                this.lineal(
-                    { x: this.x, y: this.y },
-                    { x: this.x + this.w, y: this.y + this.h },
-                    { x: x1, y: y1 }
-                )
-            ) {
-                if (
-                    this.lineal(
-                        { x: this.x + this.w, y: this.y },
-                        { x: this.x, y: this.y + this.h },
-                        { x: x1, y: y1 }
-                    )
-                ) {
-                    player.x = this.x + this.w + radius
-                    // consolthis.log('right')
-                } else {
-                    player.y = this.y - radius
-                    // consolthis.log('top')
-                }
-            } else {
-                if (
-                    this.lineal(
-                        { x: this.x + this.w, y: this.y },
-                        { x: this.x, y: this.y + this.h },
-                        { x: x1, y: y1 }
-                    )
-                ) {
-                    player.y = this.y + this.h + radius
-                } else {
-                    player.x = this.x - radius
-                }
+        if (this.checkOverlap(player.radius, player.x, player.y, this.x, this.y, this.w, this.h) && !player.noColide) {
+            let side = this.checkSide(player)
+            switch (side) {
+                case "right": player.x = this.x + this.w + radius; break;
+                case "top": player.y = this.y - radius; break;
+                case "down": player.y = this.y + this.h + radius; break;
+                case "left": player.x = this.x - radius; break;
             }
         }
     }
     this.interactEnemie = function (enemie) {
         let { x: x1, y: y1, radius } = enemie
         if (this.checkOverlap(enemie.radius, enemie.x, enemie.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2)) {
-            if (
-                this.lineal(
-                    { x: this.x, y: this.y },
-                    { x: this.x + this.w, y: this.y + this.h },
-                    { x: x1, y: y1 }
-                )
-            ) {
-                if (
-                    this.lineal(
-                        { x: this.x + this.w, y: this.y },
-                        { x: this.x, y: this.y + this.h },
-                        { x: x1, y: y1 }
-                    )
-                ) {
-                    enemie.x = this.x + this.w + radius + 1
-                    let t = (1 / 360 * 180) - enemie.angle
-                    enemie.angle = t + 180;
-                } else {
-                    enemie.y = this.y - radius - 1
-                    let t = (1 / 360 * 0) - enemie.angle
-                    enemie.angle = t + 180;
-                }
-            } else {
-                if (
-                    this.lineal(
-                        { x: this.x + this.w, y: this.y },
-                        { x: this.x, y: this.y + this.h },
-                        { x: x1, y: y1 }
-                    )
-                ) {
-                    let t = (1 / 360 * 0) - enemie.angle
-                    enemie.angle = t + 180;
-                    enemie.y = this.y + this.h + radius + 1
-                } else {
-                    enemie.x = this.x - radius - 1
-                    let t = (1 / 360 * 180) - enemie.angle
-                    enemie.angle = t + 180;
-                }
+            let side = this.checkSide(enemie)
+            let t = 0
+            switch (side) {
+                case "right": enemie.x = this.x + this.w + radius + 1; t = (1 / 360 * 180) - enemie.angle; enemie.angle = t + 180; break;
+                case "top": enemie.y = this.y - radius - 1; t = (1 / 360 * 0) - enemie.angle; enemie.angle = t + 180; break;
+                case "down": t = (1 / 360 * 0) - enemie.angle; enemie.angle = t + 180; enemie.y = this.y + this.h + radius + 1; break;
+                case "left": enemie.x = this.x - radius - 1; t = (1 / 360 * 180) - enemie.angle; enemie.angle = t + 180; break;
             }
         }
     }
@@ -341,7 +314,7 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
         }
     }
     this.teleportPlayer = function (p) {
-        if (this.checkOverlap(p.radius, p.x, p.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && this.tpArea != undefined) {
+        if (this.checkOverlap(p.radius, p.x, p.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && this.tpArea != undefined && !player.noColide) {
             MAP.changeArea(this.tpArea)
             /*if (this.translate.x != 0)
                 player.x = this.translate.x
@@ -353,7 +326,7 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
             } else if (side == "right") {
                 p.x = (this.translate.x + this.translate.w - 60) - p.radius - 1
             } else if (side == "top") {
-                p.y = (this.translate.y + p.radius- 60) + 1
+                p.y = (this.translate.y + p.radius - 60) + 1
             } else if (side == "down") {
                 p.y = (this.translate.y + this.translate.h - 60) - p.radius - 1
             }
@@ -443,20 +416,17 @@ const MAP = {
                 this.width * this.tile -
                 player.radius
         }
-        if (player.y - player.radius < 0) {
+        if (player.y - player.radius < 0)
             player.y = +player.radius
-        }
         if (
             player.y + player.radius >
             this.height * this.tile
-        ) {
+        )
             player.y =
                 this.height * this.tile -
                 player.radius
-        }
-        for (let zone in this.zones) {
+        for (let zone in this.zones)
             this.zones[zone].update(player)
-        }
     },
     changeArea: function (area) {
         this.area = area
@@ -472,15 +442,12 @@ const MAP = {
             size.height * this.tile,
             this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle
         )
-        for (let g = 0; g < size.width; g++) {
+        for (let g = 0; g < size.width; g++)
             screen.drawLine(g * this.tile + screen.offX - 10, screen.offY - 10, g * this.tile + screen.offX - 10, size.height * this.tile + screen.offY - 10, this.tileColor, 2.5)
-        }
-        for (let g = 0; g < size.height; g++) {
+        for (let g = 0; g < size.height; g++)
             screen.drawLine(screen.offX - 10, g * this.tile, size.width * this.tile + screen.offX - 10, g * this.tile, this.tileColor, 2.5)
-        }
-        for (let zone in this.zones) {
+        for (let zone in this.zones)
             this.zones[zone].draw()
-        }
         screen.drawText(this.worldName + `: Area ${this.area}`,
             canvas.width / 2, 50, this.arrayMap.datas.title.fillStyle, this.arrayMap.datas.title.strokeStyle)
         if (this.arrayMap[this.area].properties.msg)
