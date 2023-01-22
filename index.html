@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zones Redactor (Alt-Evades)</title>
+    <style>
+        canvas {
+            position: absolute;
+            transform: scale(1);
+        }
+
+        body {
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            background-color: #111;
+            color: #888
+        }
+
+        #centered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            margin-right: -50%;
+            transform: translate(-50%, -50%)
+        }
+
+        #centered h1 {
+            font-size: 4em
+        }
+
+        #centered p {
+            text-align: center;
+            font-size: 1.5em;
+            margin-top: -7.5%;
+        }
+
+        #play {
+            background-color: #555;
+            border-radius: 10px;
+            border: none;
+            font-size: 1em;
+            width: 4vw;
+        }
+
+        #input {
+            width: 9vw;
+        }
+
+        #change-log {
+            position: absolute;
+            left: 85%;
+            top: 75%;
+            width: 23.5%;
+            height: 55%;
+            text-align: center;
+            overflow: scroll;
+            font-weight: 900;
+            font-size: 1.5em;
+            transform: translate(-75%, -85%)
+        }
+
+        #change-log #changes {
+            font-size: 2em;
+        }
+
+        #change-log #update {
+            margin-top: -7.5%;
+        }
+
+        #change-log hr {
+            height: 2%;
+            border: none;
+            background-color: #888;
+        }
+
+        #change-log li {
+            margin-left: 10%;
+            text-align: left;
+        }
+
+        #author {
+            position: absolute;
+            top: 95%;
+            left: 55%;
+            font-size: 1.5em;
+            color: rgba(159, 159, 159, 0.4);
+            transform: translate(-95%, -55%)
+        }
+    </style>
+    <script>
+        function random(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function combineColors(bg, color) {
+            var a = color[3];
+            var r = Math.round((1 - a) * bg[0] + a * color[0]);
+            var g = Math.round((1 - a) * bg[1] + a * color[1]);
+            var b = Math.round((1 - a) * bg[2] + a * color[2]);
+            var color = [r, g, b].join();
+            return 'rgb(' + color + ')';
+        }
+
+        let world_name = "Tset"
+        let map = {
+            "1": {
+                "zones": [
+                    {
+                        "type": "spawner",
+                        "x": "32t",
+                        "y": "0t",
+                        "w": "45t",
+                        "h": "15t",
+                        "enemies": [
+                            {
+                                "speed": 10,
+                                "amount": 10,
+                                "radius": 10
+                            }
+                        ]
+                    },
+                    {
+                        "type": "wall",
+                        "x": "40t",
+                        "y": "10t",
+                        "w": "10t",
+                        "h": "10t"
+                    },
+                    {
+                        "type": "teleport",
+                        "x": "78t",
+                        "y": "0t",
+                        "w": "2t",
+                        "h": "15t",
+                        "tpArea": "_next",
+                        "translate": {
+                            "x": "4t",
+                            "y": "0t"
+                        }
+                    }
+                ],
+                "properties": {
+                    "size": {
+                        "width": 80,
+                        "height": 15
+                    },
+                    "msg": "Viewer in beta ;P"
+                }
+            },
+            "2": {
+                "zones": [
+                    {
+                        "type": "spawner",
+                        "x": "10t",
+                        "y": "0t",
+                        "w": "65t",
+                        "h": "15t",
+                        "enemies": [
+                            {
+                                "speed": 20,
+                                "amount": 100,
+                                "radius": 10
+                            },
+                            {
+                                "speed": 5,
+                                "amount": 20,
+                                "radius": 30
+                            }
+                        ]
+                    },
+                    {
+                        "type": "save",
+                        "x": "0t",
+                        "y": "0t",
+                        "w": "10t",
+                        "h": "15t"
+                    },
+                    {
+                        "type": "teleport",
+                        "x": "0t",
+                        "y": "0t",
+                        "w": "2t",
+                        "h": "15t",
+                        "tpArea": "_prev",
+                        "translate": {
+                            "x": "4tn",
+                            "y": "0t"
+                        }
+                    },
+                    {
+                        "type": "save",
+                        "x": "10tn",
+                        "y": "15tn",
+                        "w": "10t",
+                        "h": "15t"
+                    },
+                    {
+                        "type": "teleport",
+                        "x": "2tn",
+                        "y": "15tn",
+                        "w": "2t",
+                        "h": "15t",
+                        "tpArea": "_next",
+                        "transform": {
+                            "x": "4t",
+                            "y": "0t"
+                        }
+                    }
+                ],
+                "properties": {
+                    "size": {
+                        "width": 80,
+                        "height": 15
+                    },
+                    "msg": "Teleport is working ;)",
+                    "area-name": "Tset Name"
+                }
+            },
+            "datas": {
+                "fillStyle": "#18ffc1",
+                "title": {
+                    "fillStyle": "#fff",
+                    "strokeStyle": "#36ce41"
+                }
+            }
+        }
+    </script>
+    <script type="text/javascript" src="./yaml.min.js"></script>
+    <script src="https://unpkg.com/parse-css-color"></script>
+</head>
+
+<body>
+    <div id="menu">
+        <div id="centered">
+            <h1>Alt-Evades (Mini)</h1>
+            <p>Viewer in beta! Version: 0.7.5</p>
+            <input type="file" id="input">
+            <button id="play">Play</button>
+        </div>
+        <div id="change-log">
+            <dt id="changes">Change log</dt>
+            <hr>
+            <br>
+            <dt id="update">Обновление 1.7.5 <br> 22-01-2023</dt>
+            <hr>
+            <li>Добавленно управление на мышку</li>
+            <li>Доделан телепорт (как в обыч) *Но не без проблем</li>
+            <li>Новые хот кеи: E (перемещает на 1 арею назад), R (перемещает на 1 арею в-перед)</li>
+            <li>Исправлен баг с неправельным названием trasnform - translate </li>
+            <li>Есть еще некоторые баги с тепами, но</li>
+            <li>Работаю дальше! ;)</li>
+            <hr>
+        </div>
+        <div id="author">
+            <p>Powered by @EtherCD</p>
+        </div>
+    </div>
+    <div id="game" style="display: none;">
+        <canvas id="canvas" width="1280" height="720"></canvas>
+    </div>
+    <script>
+        function resize() {
+            let scale = window.innerWidth / canvas.width
+            if (window.innerHeight / canvas.height < window.innerWidth / canvas.width) {
+                scale = window.innerHeight / canvas.height
+            }
+            canvas.style.transform = "scale(" + scale + ")"
+            canvas.style.left = 1 / 2 * (window.innerWidth - canvas.width) + "px"
+            canvas.style.top = 1 / 2 * (window.innerHeight - canvas.height) + "px"
+        }
+        window.onload = () => resize()
+        window.onresize = () => resize()
+        document.getElementById("play").onclick = () => {
+            let mainScript = document.createElement("script")
+            mainScript.src = "./main.js"
+            document.body.append(mainScript)
+            document.getElementById("menu").style.display = "none"
+            document.getElementById("game").style.display = ""
+            const selectedFile = document.getElementById('input').files[0]
+            if (selectedFile != undefined) {
+                let fr = new FileReader();
+                fr.onload = (e) => {
+                    let lines = e.target.result;
+                    if (selectedFile.name.endsWith(".json")) {
+                        world_name = selectedFile.name.slice(0, -5)
+                        var newArr = JSON.parse(lines);
+                        map = newArr
+                    }
+                    if (selectedFile.name.endsWith(".yaml")
+                        || selectedFile.name.endsWith(".yml")) {
+                        if (selectedFile.name.endsWith(".yaml"))
+                            world_name = selectedFile.name.slice(0, -5)
+                        else world_name = selectedFile.name.slice(0, -4)
+                        var newArr = YAML.parse(lines);
+                        map = newArr
+                    }
+                    //MAP.worldName =
+                };
+                fr.readAsText(selectedFile);
+
+            }
+        }
+    </script>
+</body>
+
+</html>
