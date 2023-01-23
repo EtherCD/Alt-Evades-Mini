@@ -1,254 +1,20 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alt-Evades (Mini)</title>
-    <style>
-        canvas {
-            position: absolute;
-            transform: scale(1);
-        }
-
-        body {
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
-            background-color: #111;
-            color: #888
-        }
-
-        #centered {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            margin-right: -50%;
-            transform: translate(-50%, -50%)
-        }
-
-        #centered h1 {
-            font-size: 4em
-        }
-
-        #centered p {
-            text-align: center;
-            font-size: 1.5em;
-            margin-top: -7.5%;
-        }
-
-        #play {
-            background-color: #555;
-            border-radius: 10px;
-            border: none;
-            font-size: 1em;
-            width: 4vw;
-        }
-
-        #input {
-            width: 9vw;
-        }
-
-        #change-log {
-            position: absolute;
-            left: 85%;
-            top: 75%;
-            width: 23.5%;
-            height: 55%;
-            text-align: center;
-            overflow: scroll;
-            font-weight: 900;
-            font-size: 1.5em;
-            transform: translate(-75%, -85%)
-        }
-
-        #change-log #changes {
-            font-size: 2em;
-        }
-
-        #change-log #update {
-            margin-top: -7.5%;
-        }
-
-        #change-log hr {
-            height: 2%;
-            border: none;
-            background-color: #888;
-        }
-
-        #change-log li {
-            margin-left: 10%;
-            text-align: left;
-        }
-
-        #author {
-            position: absolute;
-            top: 95%;
-            left: 55%;
-            font-size: 1.5em;
-            color: rgba(159, 159, 159, 0.4);
-            transform: translate(-95%, -55%)
-        }
-    </style>
-    <script>
-        function random(min, max) {
-            return Math.random() * (max - min) + min;
-        }
-
-        function combineColors(bg, color) {
-            if (bg == undefined) return
-            var a = color[3];
-            var r = Math.round((1 - a) * bg[0] + a * color[0]);
-            var g = Math.round((1 - a) * bg[1] + a * color[1]);
-            var b = Math.round((1 - a) * bg[2] + a * color[2]);
-            var color = [r, g, b].join();
-            return 'rgb(' + color + ')';
-        }
-
-        function mixColors(t, e) {
-            var i = t[3] / 255;
-            var a = e[3] / 255;
-            var n = [];
-            var r = 1 - (1 - a) * (1 - i);
-            return n[0] = Math.round(e[0] * a / r + t[0] * i * (1 - a) / r), n[1] = Math.round(e[1] * a / r + t[1] * i * (1 - a) / r), n[2] = Math.round(e[2] * a / r + t[2] * i * (1 - a) / r), n[3] = r, n
-        }
-
-        let world_name = "Tset"
-        let map = {
-            "1": {
-                "zones": [
-                    {
-                        "type": "spawner",
-                        "x": "32t",
-                        "y": "0t",
-                        "w": "45t",
-                        "h": "15t",
-                        "enemies": [
-                            {
-                                "speed": 10,
-                                "amount": 10,
-                                "radius": 10
-                            }
-                        ]
-                    },
-                    {
-                        "type": "wall",
-                        "x": "40t",
-                        "y": "10t",
-                        "w": "10t",
-                        "h": "10t"
-                    },
-                    {
-                        "type": "teleport",
-                        "x": "78t",
-                        "y": "0t",
-                        "w": "2t",
-                        "h": "15t",
-                        "tpArea": "_next",
-                        "translate": {
-                            "x": "0t",
-                            "y": "0t",
-                            "w": "2t",
-                            "h": "15t"
-                        }
-                    }
-                ],
-                "properties": {
-                    "size": {
-                        "width": 80,
-                        "height": 15
-                    },
-                    "msg": "Viewer in beta ;P"
-                }
-            },
-            "2": {
-                "zones": [
-                    {
-                        "type": "spawner",
-                        "x": "10t",
-                        "y": "0t",
-                        "w": "65t",
-                        "h": "15t",
-                        "enemies": [
-                            {
-                                "speed": 20,
-                                "amount": 100,
-                                "radius": 10
-                            },
-                            {
-                                "speed": 5,
-                                "amount": 20,
-                                "radius": 30
-                            }
-                        ]
-                    },
-                    {
-                        "type": "save",
-                        "x": "0t",
-                        "y": "0t",
-                        "w": "10t",
-                        "h": "15t"
-                    },
-                    {
-                        "type": "teleport",
-                        "x": "0t",
-                        "y": "0t",
-                        "w": "2t",
-                        "h": "15t",
-                        "tpArea": "_prev",
-                        "translate": {
-                            "x": "4tn",
-                            "y": "0t",
-                            "w": "2t",
-                            "h": "15t"
-                        },
-                    },
-                    {
-                        "type": "save",
-                        "x": "10tn",
-                        "y": "15tn",
-                        "w": "10t",
-                        "h": "15t"
-                    },
-                    {
-                        "type": "teleport",
-                        "x": "2tn",
-                        "y": "15tn",
-                        "w": "2t",
-                        "h": "15t",
-                        "tpArea": "_next",
-                        "transform": {
-                            "x": "4t",
-                            "y": "0t"
-                        }
-                    }
-                ],
-                "properties": {
-                    "size": {
-                        "width": 80,
-                        "height": 15
-                    },
-                    "msg": "Teleport is working ;)",
-                    "area-name": "Tset Name"
-                }
-            },
-            "datas": {
-                "fillStyle": "#18ffc1",
-                "title": {
-                    "fillStyle": "#fff",
-                    "strokeStyle": "#36ce41"
-                }
-            }
-        }
-    </script>
-    <script type="text/javascript" src="./yaml.min.js"></script>
-    <script type="text/javascript" src="./color-parse.js"></script>
+    <style src="./css/style.css"></style>
+    <script type="text/javascript" src="./js/loader.js"></script>
+    <script type="text/javascript" src="./js/yaml.min.js"></script>
+    <script type="text/javascript" src="./js/color-parse.js"></script>
 </head>
-
 <body>
     <div id="menu">
         <div id="centered">
             <h1>Alt-Evades (Mini)</h1>
-            <p>Viewer in beta! Version: 0.7.8</p>
+            <p>Viewer in beta! Version: 0.7.9</p>
             <input type="file" id="input">
             <button id="play">Play</button>
         </div>
@@ -256,12 +22,20 @@
             <dt id="changes">Change log</dt>
             <hr>
             <br>
+            <dt id="update">Обновление 0.7.9<br> 23-01-2023</dt>
+            <hr>
+            <li>Изменена стандартная карта на Missing Map</li>
+            <li>Был пофикшен маленький недочет (карта иногда не грузилась)</li>
+            <li>Переформатирована вся верстка</li>
+            <hr>
+            <br>
             <dt id="update">Обновление 0.7.8<br> 22-01-2023</dt>
             <hr>
             <li>Еще одно сокращение кода (было 512 - стало 451 строк)</li>
             <li>Зато без багов ;)</li>
             <li>Новый хот кей: V - отключение столкновений</li>
-            <li>Новая тест способность: Inertia (кнопка Z): постепенно ускоряет игрока, но после 30 скорости сбрасывает ёе</li>
+            <li>Новая тест способность: Inertia (кнопка Z): постепенно ускоряет игрока, но после 30 скорости сбрасывает
+                ёе</li>
             <hr>
             <br>
             <dt id="update">Обновление 0.7.7<br> 22-01-2023</dt>
@@ -287,6 +61,11 @@
             <li>Работаю дальше! ;)</li>
             <hr>
         </div>
+        <!--<div id="map-message">
+            <dt>Map Errors</dt>
+            <hr>
+            <p id="error-message">  </p>
+        </div>-->
         <div id="author">
             <p>Powered by @EtherCD</p>
         </div>
@@ -306,34 +85,21 @@
         }
         window.onload = () => resize()
         window.onresize = () => resize()
+        document.getElementById("input").addEventListener('change', () => {
+            const selectedFile = document.getElementById('input').files[0]
+            if (selectedFile != undefined) {
+                loadFileMap(selectedFile)
+            }
+        })
         document.getElementById("play").onclick = () => {
             let mainScript = document.createElement("script")
-            mainScript.src = "./main.js"
+            mainScript.src = "./js/main.js"
             document.body.append(mainScript)
             document.getElementById("menu").style.display = "none"
             document.getElementById("game").style.display = ""
             const selectedFile = document.getElementById('input').files[0]
             if (selectedFile != undefined) {
-                let fr = new FileReader();
-                fr.onload = (e) => {
-                    let lines = e.target.result;
-                    if (selectedFile.name.endsWith(".json")) {
-                        world_name = selectedFile.name.slice(0, -5)
-                        var newArr = JSON.parse(lines);
-                        map = newArr
-                    }
-                    if (selectedFile.name.endsWith(".yaml")
-                        || selectedFile.name.endsWith(".yml")) {
-                        if (selectedFile.name.endsWith(".yaml"))
-                            world_name = selectedFile.name.slice(0, -5)
-                        else world_name = selectedFile.name.slice(0, -4)
-                        var newArr = YAML.parse(lines);
-                        map = newArr
-                    }
-                    //MAP.worldName =
-                };
-                fr.readAsText(selectedFile);
-
+                loadFileMap(selectedFile)
             }
         }
     </script>

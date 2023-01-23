@@ -1,0 +1,109 @@
+canvas {
+    position: absolute;
+    transform: scale(1);
+}
+
+body {
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    background-color: #111;
+    color: #888
+}
+
+#centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%)
+}
+
+#centered h1 {
+    font-size: 4em
+}
+
+#centered p {
+    text-align: center;
+    font-size: 1.5em;
+    margin-top: -7.5%;
+}
+
+#play {
+    background-color: #555;
+    border-radius: 10px;
+    border: none;
+    font-size: 1em;
+    width: 4vw;
+}
+
+#input {
+    width: 9vw;
+}
+
+#change-log {
+    position: absolute;
+    left: 85%;
+    top: 75%;
+    width: 23.5%;
+    height: 55%;
+    text-align: center;
+    overflow: scroll;
+    font-weight: 900;
+    font-size: 1.5em;
+    transform: translate(-75%, -85%)
+}
+
+#change-log #changes {
+    font-size: 2em;
+}
+
+#change-log #update {
+    margin-top: -7.5%;
+}
+
+#change-log hr {
+    height: 2%;
+    border: none;
+    background-color: #888;
+}
+
+#change-log li {
+    margin-left: 10%;
+    text-align: left;
+}
+
+#author {
+    position: absolute;
+    top: 95%;
+    left: 55%;
+    font-size: 1.5em;
+    color: rgba(159, 159, 159, 0.4);
+    transform: translate(-95%, -55%)
+}
+
+#map-message {
+    position: absolute;
+    width: 25%;
+    height: 50%;
+    top:15%;
+    left:20%;
+    text-align: center;
+    overflow: scroll;
+    transform: translate(-50%, 30%)
+}
+
+#map-message dt {
+    font-size: 3em;
+    font-weight: 900;
+}
+
+#map-message hr {
+    height: 2%;
+    border: none;
+    background-color: #888;
+}
+
+#map-message p {
+    font-size: 1.5em;
+    font-weight: 900;
+    margin-top: 1%;
+}
