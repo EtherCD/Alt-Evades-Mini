@@ -49,6 +49,7 @@ const player = {
     y: 10,
     radius: 15,
     speed: 17,
+    baseSpeed: 17,
     movement: {
         "left": false, "right": false,
         "top": false, "down": false,
@@ -56,6 +57,7 @@ const player = {
         "mouX": 0, "mouY": 0,
         "z": false
     },
+    inSomeEffect: {},
     firstAbilityTimer: 0,
     color: [255, 0, 0, 1],
     noColide: false,
@@ -151,28 +153,60 @@ const player = {
         })
     },
     update: function () {
+        // effects
+        if (this.inSomeEffect["inversivity"]) {
+            this.speed = -Math.abs(this.speed)
+            this.inSomeEffect["inversivity"] = false
+        }
+        if (this.inSomeEffect["slowdown"]) {
+            if (this.inSomeEffect["slowdown"] == Math.abs(this.inSomeEffect["slowdown"]))
+                this.speed = this.baseSpeed / this.inSomeEffect["slowdown"]
+            else
+                this.speed = this.baseSpeed * Math.abs(this.inSomeEffect["slowdown"])
+        }
+        if (this.inSomeEffect["magnetism"]) {
+            this.y += Math.sin((Math.PI * this.inSomeEffect["magnetism"]) * 10) * Math.PI * 0.2
+            this.x += Math.cos((Math.PI * this.inSomeEffect["magnetism"]) * 10) * Math.PI * 0.2
+        }
+        if (this.inSomeEffect["storm"]) {
+            this.y += Math.sin((Math.PI * this.inSomeEffect["storm"]) * 10) * Math.PI * 0.1
+            this.x += Math.cos((Math.PI * this.inSomeEffect["storm"]) * 10) * Math.PI * 0.1
+        }
+        //end effects
         let move = this.move()
         if (!move || this.speed > 30) { this.firstAbilityTimer = 0; this.speed = 17 }
         if (this.movement.z && move) {
             this.firstAbilityTimer += 1 / 500
             this.speed += this.firstAbilityTimer
         }
+        if (this.speed != Math.abs(this.speed)) this.speed = Math.abs(this.speed)
+        if (this.inSomeEffect["slowdown"]) delete this.inSomeEffect["slowdown"]
+        if (this.inSomeEffect["magnetism"]) delete this.inSomeEffect["magnetism"]
+        if (this.inSomeEffect["storm"]) delete this.inSomeEffect["storm"]
+        this.speed = this.baseSpeed
     },
     draw: function () {
         screen.drawCircle(this.x, this.y, this.radius, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.color[3]})`)
     }
 }
 
-function Enemie({ x, y, w, h, radius, speed }) {
-    this.x = random(x, w + x)
-    this.y = random(y, h + y)
+function Enemie({ x1, y1, x, y, w, h, radius, speed, angle }) {
+    this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
+    let mx = this.handlingType(x1, MAP.width)
+    let my = this.handlingType(y1, MAP.height)
+    if (x1) this.x = mx
+    else this.x = random(x, w + x)
+    if (y1) this.y = my
+    else this.y = random(y, h + y)
     this.sx = x
     this.sy = y
     this.sw = w
     this.sh = h
     this.radius = radius
-    this.angle = Math.random()
     this.speed = speed / 10
+    let ma = Math.random();
+    if (angle) { if (typeof angle == 'string') { if (angle.endsWith('deg')) { ma = angle.slice(0, -3) / 360 + 0.25 } } else { ma = angle } }
+    this.angle = ma
     this.update = function () {
         this.x += (Math.cos(this.angle * Math.PI * 2) * this.speed) / 2;
         this.y += (Math.sin(this.angle * Math.PI * 2) * this.speed) / 2;
@@ -202,7 +236,7 @@ function Enemie({ x, y, w, h, radius, speed }) {
     }
 }
 
-function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
+function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite, direction }) {
     this.type = type
     this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
     if (w)
@@ -218,12 +252,15 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
         for (let e in Enemies) {
             for (let i = 0; i < Enemies[e].amount; i++) {
                 MAP.enemies[e + i] = new Enemie({
+                    x1: Enemies[e].x,
+                    y1: Enemies[e].y,
                     x: this.x,
                     y: this.y,
                     w: this.w,
                     h: this.h,
                     radius: Enemies[e].radius,
-                    speed: Enemies[e].speed
+                    speed: Enemies[e].speed,
+                    angle: Enemies[e].angle
                 })
             }
         }
@@ -342,11 +379,18 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
         let color = "#333"
         switch (this.type) {
             case "spawner": color = "rgba(156,156,156,0.25)"; break;
-            case "slowdown": color = "rgba(136,211,198,0.25)"; break;
+            case "slowdown":
+                if (slowdown == Math.abs(slowdown))
+                    color = "rgba(220,99,91,0.25)"
+                else color = "rgba(91,218,220,0.25)"
+                break;
             case "inversivity": color = "rgba(167,60,227,0.6)"; break;
             case "storm": color = "rgba(242,165,60,0.6)"; break;
             case "save": color = "rgba(216,216,216,0.5)"; break;
-            case "magnetism": color = "rgba(164,150,255,0.3)"; break;
+            case "magnetism":
+                if (magnite) color = "rgba(255,56,82,0.3)"
+                else color = "rgba(164,150,255,0.3)"
+                break;
             case "teleport": color = "rgba(217,183,63,0.3)"; break;
             default: color = "#333"; break;
         }
@@ -369,6 +413,22 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea }) {
             if (this.type == "wall" || this.type == "save")
                 this.interactEnemie(MAP.enemies[e])
             MAP.enemies[e].update()
+        }
+        if (this.type == "inversivity") {
+            if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide)
+                player.inSomeEffect["inversivity"] = true
+        }
+        if (this.type == "slowdown") {
+            if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide)
+                player.inSomeEffect["slowdown"] = slowdown
+        }
+        if (this.type == "magnetism") {
+            if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide)
+                player.inSomeEffect["magnetism"] = magnite ? 0.25 : 0.75
+        }
+        if (this.type == "storm") {
+            if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide)
+                player.inSomeEffect["storm"] = direction
         }
     }
 }
@@ -398,7 +458,10 @@ const MAP = {
                 type: map[this.area].zones[i].type,
                 Enemies: map[this.area].zones[i].enemies,
                 translate: map[this.area].zones[i].translate || {},
-                tpArea: map[this.area].zones[i].tpArea
+                tpArea: map[this.area].zones[i].tpArea,
+                slowdown: map[this.area].zones[i].slowdown,
+                magnite: map[this.area].zones[i].magnite,
+                direction: map[this.area].zones[i].direction
             })
         }
     },

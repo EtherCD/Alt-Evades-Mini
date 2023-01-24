@@ -260,6 +260,329 @@ let map = {
             }
         }
     },
+    "3": {
+        "zones": [
+            {
+                "type": "spawner",
+                "x": "0t",
+                "y": "0t",
+                "w": "16t",
+                "h": "16t",
+                "enemies": [
+                ]
+            },
+            {
+                "type": "save",
+                "x": "0t",
+                "y": "0t",
+                "w": "4t",
+                "h": "4t"
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t"
+            },
+            {
+                "type": "teleport",
+                "x": "1t",
+                "y": "0t",
+                "w": "2t",
+                "h": "1t",
+                "tpArea": "_prev",
+                "translate": {
+                    "x": "5t",
+                    "y": "0t",
+                    "w": "1t",
+                    "h": "4t"
+                }
+            },
+            {
+                "type": "teleport",
+                "x": "5t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t",
+                "tpArea": "_next",
+                "translate": {
+                    "x": "0t",
+                    "y": "0t",
+                    "w": "0t",
+                    "h": "0t"
+                }
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "4t",
+                "w": "8t",
+                "h": "8t"
+            },
+            {
+                "type": "inversivity",
+                "x": "0t",
+                "y": "4t",
+                "w": "16t",
+                "h": "12t"
+            }
+        ],
+        "properties": {
+            "size": {
+                "width": 16,
+                "height": 16
+            },
+            "msg": "Oh NO! Inversivity!"
+        }
+    },
+    "4": {
+        "zones": [
+            {
+                "type": "spawner",
+                "x": "0t",
+                "y": "0t",
+                "w": "16t",
+                "h": "16t",
+                "enemies": [
+                ]
+            },
+            {
+                "type": "save",
+                "x": "0t",
+                "y": "0t",
+                "w": "4t",
+                "h": "4t"
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t"
+            },
+            {
+                "type": "teleport",
+                "x": "1t",
+                "y": "0t",
+                "w": "2t",
+                "h": "1t",
+                "tpArea": "_prev",
+                "translate": {
+                    "x": "5t",
+                    "y": "0t",
+                    "w": "1t",
+                    "h": "4t"
+                }
+            },
+            {
+                "type": "teleport",
+                "x": "5t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t",
+                "tpArea": "_next",
+                "translate": {
+                    "x": "0t",
+                    "y": "0t",
+                    "w": "0t",
+                    "h": "0t"
+                }
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "4t",
+                "w": "8t",
+                "h": "8t"
+            },
+            {
+                "type": "slowdown",
+                "x": "0t",
+                "y": "4t",
+                "w": "8t",
+                "h": "12t",
+                "slowdown": 2
+            },
+            {
+                "type": "slowdown",
+                "x": "8t",
+                "y": "4t",
+                "w": "8t",
+                "h": "12t",
+                "slowdown": -2
+            }
+        ],
+        "properties": {
+            "size": {
+                "width": 16,
+                "height": 16
+            },
+            "msg": "Slowdown or Acceleration?"
+        }
+    },
+    "5": {
+        "zones": [
+            {
+                "type": "spawner",
+                "x": "0t",
+                "y": "0t",
+                "w": "16t",
+                "h": "16t",
+                "enemies": [
+                ]
+            },
+            {
+                "type": "save",
+                "x": "0t",
+                "y": "0t",
+                "w": "4t",
+                "h": "4t"
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t"
+            },
+            {
+                "type": "teleport",
+                "x": "1t",
+                "y": "0t",
+                "w": "2t",
+                "h": "1t",
+                "tpArea": "_prev",
+                "translate": {
+                    "x": "5t",
+                    "y": "0t",
+                    "w": "1t",
+                    "h": "4t"
+                }
+            },
+            {
+                "type": "teleport",
+                "x": "5t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t",
+                "tpArea": "_next",
+                "translate": {
+                    "x": "0t",
+                    "y": "0t",
+                    "w": "0t",
+                    "h": "0t"
+                }
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "4t",
+                "w": "8t",
+                "h": "8t"
+            },
+            {
+                "type": "magnetism",
+                "x": "0t",
+                "y": "4t",
+                "w": "8t",
+                "h": "12t",
+                "magnite": true
+            },
+            {
+                "type": "magnetism",
+                "x": "8t",
+                "y": "4t",
+                "w": "8t",
+                "h": "12t",
+                "magnite": false
+            }
+        ],
+        "properties": {
+            "size": {
+                "width": 16,
+                "height": 16
+            },
+            "msg": "Magnetism or Attraction?"
+        }
+    },
+    "6": {
+        "zones": [
+            {
+                "type": "spawner",
+                "x": "0t",
+                "y": "0t",
+                "w": "16t",
+                "h": "16t",
+                "enemies": [
+                ]
+            },
+            {
+                "type": "save",
+                "x": "0t",
+                "y": "0t",
+                "w": "4t",
+                "h": "4t"
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t"
+            },
+            {
+                "type": "teleport",
+                "x": "1t",
+                "y": "0t",
+                "w": "2t",
+                "h": "1t",
+                "tpArea": "_prev",
+                "translate": {
+                    "x": "5t",
+                    "y": "0t",
+                    "w": "1t",
+                    "h": "4t"
+                }
+            },
+            {
+                "type": "teleport",
+                "x": "5t",
+                "y": "0t",
+                "w": "1t",
+                "h": "4t",
+                "tpArea": "_next",
+                "translate": {
+                    "x": "0t",
+                    "y": "0t",
+                    "w": "0t",
+                    "h": "0t"
+                }
+            },
+            {
+                "type": "wall",
+                "x": "4t",
+                "y": "4t",
+                "w": "8t",
+                "h": "8t"
+            },
+            {
+                "type": "storm",
+                "x": "0t",
+                "y": "0t",
+                "w": "16t",
+                "h": "16t",
+                "direction": 1
+            }
+        ],
+        "properties": {
+            "size": {
+                "width": 16,
+                "height": 16
+            },
+            "msg": "Storm.."
+        }
+    },
     "datas": {
         "fillStyle": "#969696",
         "title": {
