@@ -71,6 +71,10 @@ body {
     text-align: left;
 }
 
+#change-log #in {
+    color: #b19835
+}
+
 #author {
     position: absolute;
     top: 95%;

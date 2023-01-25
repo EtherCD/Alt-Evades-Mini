@@ -81,8 +81,14 @@ const player = {
         if (this.movement.mouse) {
             let angle = Math.atan2(this.movement.mouY, this.movement.mouX)
             let distance = this.d(0, 0, this.movement.mouX, this.movement.mouY) / 15
-            let speedX = (Math.cos(angle) * (Math.min(this.speed, distance) * shiftCoef) / 2)
-            let speedY = (Math.sin(angle) * (Math.min(this.speed, distance) * shiftCoef) / 2)
+            let speedX, speedY
+            if (this.speed != Math.abs(this.speed)) {
+                speedX = -(Math.cos(angle) * (Math.min(Math.abs(this.speed), distance * (Math.abs(this.speed) / 17)) * shiftCoef) / 2)
+                speedY = -(Math.sin(angle) * (Math.min(Math.abs(this.speed), distance * (Math.abs(this.speed) / 17)) * shiftCoef) / 2)
+            } else {
+                speedX = (Math.cos(angle) * (Math.min(this.speed, distance * (this.speed / 17)) * shiftCoef) / 2)
+                speedY = (Math.sin(angle) * (Math.min(this.speed, distance * (this.speed / 17)) * shiftCoef) / 2)
+            }
             this.x += speedX
             this.y += speedY
             move = true
@@ -165,12 +171,12 @@ const player = {
                 this.speed = this.baseSpeed * Math.abs(this.inSomeEffect["slowdown"])
         }
         if (this.inSomeEffect["magnetism"]) {
-            this.y += Math.sin((Math.PI * this.inSomeEffect["magnetism"]) * 10) * Math.PI * 0.2
-            this.x += Math.cos((Math.PI * this.inSomeEffect["magnetism"]) * 10) * Math.PI * 0.2
+            this.y += Math.sin((Math.PI * this.inSomeEffect["magnetism"].angle) * 10) * Math.PI * (0.1 * this.inSomeEffect["magnetism"].efSpeed)
+            this.x += Math.cos((Math.PI * this.inSomeEffect["magnetism"].angle) * 10) * Math.PI * (0.1 * this.inSomeEffect["magnetism"].efSpeed)
         }
         if (this.inSomeEffect["storm"]) {
-            this.y += Math.sin((Math.PI * this.inSomeEffect["storm"]) * 10) * Math.PI * 0.1
-            this.x += Math.cos((Math.PI * this.inSomeEffect["storm"]) * 10) * Math.PI * 0.1
+            this.y += Math.sin((Math.PI * this.inSomeEffect["storm"].angle) * 10) * Math.PI * (0.1 * this.inSomeEffect["storm"].efSpeed)
+            this.x += Math.cos((Math.PI * this.inSomeEffect["storm"].angle) * 10) * Math.PI * (0.1 * this.inSomeEffect["storm"].efSpeed)
         }
         //end effects
         let move = this.move()
@@ -236,7 +242,7 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle }) {
     }
 }
 
-function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite, direction }) {
+function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite, direction, efSpeed }) {
     this.type = type
     this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
     if (w)
@@ -424,11 +430,12 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
         }
         if (this.type == "magnetism") {
             if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide)
-                player.inSomeEffect["magnetism"] = magnite ? 0.25 : 0.75
+                player.inSomeEffect["magnetism"] = { angle: magnite ? 0.25 : 0.75, efSpeed: efSpeed || 2 }
         }
         if (this.type == "storm") {
-            if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide)
-                player.inSomeEffect["storm"] = direction
+            if (this.checkOverlap(player.radius, player.x, player.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && !player.noColide) {
+                player.inSomeEffect["storm"] = { angle: direction, efSpeed: efSpeed || 1 }
+            }
         }
     }
 }
@@ -461,7 +468,8 @@ const MAP = {
                 tpArea: map[this.area].zones[i].tpArea,
                 slowdown: map[this.area].zones[i].slowdown,
                 magnite: map[this.area].zones[i].magnite,
-                direction: map[this.area].zones[i].direction
+                direction: map[this.area].zones[i].dir,
+                efSpeed: map[this.area].zones[i].efSpeed
             })
         }
     },

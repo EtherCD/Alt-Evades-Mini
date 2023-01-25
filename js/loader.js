@@ -487,7 +487,8 @@ let map = {
                 "y": "4t",
                 "w": "8t",
                 "h": "12t",
-                "magnite": true
+                "magnite": true,
+                "efSpeed": 10
             },
             {
                 "type": "magnetism",
@@ -495,7 +496,8 @@ let map = {
                 "y": "4t",
                 "w": "8t",
                 "h": "12t",
-                "magnite": false
+                "magnite": false,
+                "efSpeed": 10
             }
         ],
         "properties": {
@@ -572,7 +574,8 @@ let map = {
                 "y": "0t",
                 "w": "16t",
                 "h": "16t",
-                "direction": 1
+                "dir": 1,
+                "efSpeed": 10
             }
         ],
         "properties": {
@@ -580,7 +583,7 @@ let map = {
                 "width": 16,
                 "height": 16
             },
-            "msg": "Storm.."
+            "msg": "Storm.. (With efSpeed)"
         }
     },
     "datas": {
