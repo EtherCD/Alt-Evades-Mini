@@ -504,11 +504,15 @@ const MAP = {
         this.zonesCount = this.zones.length + 1
         this.enemiesCount = this.enemies.length + 1
         this.enemiesList = []
-        let enemiesList = this.enemies.reduce(function (stack, value) {
+        let typesArray = []
+        for (let i in this.enemies) {
+            typesArray.push(this.enemies[i].type)
+        }
+        let enemiesList = typesArray.reduce(function (stack, value) {
             return stack[value] ? stack[value]++ : stack[value] = 1, stack;
         }, {})
         Object.keys(enemiesList).forEach((el, e) => {
-            this.enemiesList.push(`${this.enemies[e].type} x${enemiesList[el]}`)
+            this.enemiesList.push(`${el} x${enemiesList[el]}`)
         })
         this.enemiesList = this.enemiesList.join(" ")
     },
