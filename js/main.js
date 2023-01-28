@@ -4,11 +4,16 @@ let ctx = canvas.getContext("2d")
 let screen = {
     offX: 10,
     offY: 10,
-    drawCircle: function (x, y, r, color) {
+    drawCircle: function (x, y, r, color, stroke) {
         ctx.beginPath()
         ctx.fillStyle = color
         ctx.arc(x - this.xOff, y - this.yOff, r, 0, 2 * Math.PI);
         ctx.fill()
+        ctx.lineWidth = 3
+        if (stroke) {
+            ctx.strokeStyle = "#333"
+            ctx.stroke()
+        }
         ctx.closePath()
     },
     drawRect: function (x, y, w, h, color) {
@@ -24,12 +29,12 @@ let screen = {
         ctx.stroke()
         ctx.closePath()
     },
-    drawText: function (text, x, y, color, background) {
+    drawText: function (text, x, y, color, background, font = "bold 35px Tahoma, Verdana, Segoe, sans-serif", lineWidth = 6, align = "center") {
         ctx.beginPath()
         ctx.fillStyle = color
-        ctx.textAlign = "center"
-        ctx.lineWidth = 6
-        ctx.font = "bold 35px Tahoma, Verdana, Segoe, sans-serif"
+        ctx.textAlign = align
+        ctx.lineWidth = lineWidth
+        ctx.font = font
         ctx.strokeStyle = background
         ctx.strokeText(text, x, y)
         ctx.fillText(text, x, y)
@@ -196,7 +201,7 @@ const player = {
     }
 }
 
-function Enemie({ x1, y1, x, y, w, h, radius, speed, angle }) {
+function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type }) {
     this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
     let mx = this.handlingType(x1, MAP.width)
     let my = this.handlingType(y1, MAP.height)
@@ -204,6 +209,7 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle }) {
     else this.x = random(x, w + x)
     if (y1) this.y = my
     else this.y = random(y, h + y)
+    this.type = type
     this.sx = x
     this.sy = y
     this.sw = w
@@ -238,13 +244,13 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle }) {
         }
     }
     this.draw = function () {
-        screen.drawCircle(this.x, this.y, this.radius, "#787878")
+        screen.drawCircle(this.x, this.y, this.radius, "#787878", true)
     }
 }
 
 function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite, direction, efSpeed }) {
     this.type = type
-    this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
+    this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return (side * MAP.tile) - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
     if (w)
         this.w = this.handlingType(w, MAP.width)
     if (h)
@@ -257,7 +263,7 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
     if (type == "spawner") {
         for (let e in Enemies) {
             for (let i = 0; i < Enemies[e].amount; i++) {
-                MAP.enemies[e + i] = new Enemie({
+                MAP.enemies.push(new Enemie({
                     x1: Enemies[e].x,
                     y1: Enemies[e].y,
                     x: this.x,
@@ -266,33 +272,39 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
                     h: this.h,
                     radius: Enemies[e].radius,
                     speed: Enemies[e].speed,
-                    angle: Enemies[e].angle
-                })
+                    angle: Enemies[e].angle,
+                    type: Enemies[e].type
+                }))
             }
         }
     }
     if (tpArea == "_next") {
         if (MAP.arrayMap[MAP.area + 1] != undefined)
             this.tpArea = MAP.area + 1
+        else this.tpArea = MAP.area
     }
     else if (tpArea == "_prev") {
         if (MAP.arrayMap[MAP.area - 1] != undefined)
             this.tpArea = MAP.area - 1
+        else this.tpArea = MAP.area
     }
     else {
         if (MAP.arrayMap[tpArea] != undefined)
             this.tpArea = tpArea
+        else this.tpArea = MAP.area
     }
     this.translate = translate
     if (type == "teleport") {
         if (translate.w)
-            this.translate.w = this.handlingType(translate.w, MAP.width)
+            this.translate.w = this.handlingType(translate.w, MAP.arrayMap[this.tpArea].properties.size.width)
         if (translate.h)
-            this.translate.h = this.handlingType(translate.h, MAP.height)
+            this.translate.h = this.handlingType(translate.h, MAP.arrayMap[this.tpArea].properties.size.height)
         if (translate.x)
-            this.translate.x = this.handlingType(translate.x, MAP.width)
+            this.translate.x = this.handlingType(translate.x, MAP.arrayMap[this.tpArea].properties.size.width)
         if (translate.y)
-            this.translate.y = this.handlingType(translate.y, MAP.height)
+            this.translate.y = this.handlingType(translate.y, MAP.arrayMap[this.tpArea].properties.size.height)
+        if (translate.x == "0t" || translate.x == "0tn") this.translate.x = 0
+        if (translate.y == "0t" || translate.y == "0tn") this.translate.y = 0
     }
     this.lineal = (a, b, c) => (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x) < 0
     this.interactPlayer = function (player) {
@@ -358,9 +370,9 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
         if (this.checkOverlap(p.radius, p.x, p.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && this.tpArea != undefined && !player.noColide) {
             MAP.changeArea(this.tpArea)
             /*if (this.translate.x != 0)
-                player.x = this.translate.x
+                player.x = this.translate.x + 30
             if (this.translate.y != 0)
-                player.y = this.translate.y*/
+                player.y = this.translate.y + 30*/
             let side = this.checkSide(p)
             if (side == "left") {
                 p.x = this.translate.x + p.radius + 1 + 60
@@ -450,12 +462,19 @@ const MAP = {
     zones: [],
     enemies: [],
     tileColor: "",
+
+    zonesCount: 0,
+    zonesTypes: [],
+    enemiesCount: 0,
+    enemiesList: [],
+
     init: function (map) {
         this.arrayMap = map
         this.width = map[this.area].properties.size.width
         this.height = map[this.area].properties.size.height
         this.backgroundColor = parse(this.arrayMap[this.area].properties.fillStyle || this.arrayMap.datas.fillStyle).values
         this.tileColor = combineColors(this.backgroundColor, [0, 0, 0, 0.2]);
+        this.zonesTypes = []
         for (let i in map[this.area].zones) {
             this.zones[i] = new Zone({
                 x: map[this.area].zones[i].x,
@@ -471,7 +490,27 @@ const MAP = {
                 direction: map[this.area].zones[i].dir,
                 efSpeed: map[this.area].zones[i].efSpeed
             })
+            this.zonesTypes.push(map[this.area].zones[i].type)
         }
+
+        let count = this.zonesTypes.reduce(function (stack, value) {
+            return stack[value] ? stack[value]++ : stack[value] = 1, stack;
+        }, {})
+        this.zonesTypes = []
+        Object.keys(count).forEach(el => {
+            this.zonesTypes.push(`${el} x${count[el]}`)
+        })
+        this.zonesTypes = this.zonesTypes.join(" ")
+        this.zonesCount = this.zones.length + 1
+        this.enemiesCount = this.enemies.length + 1
+        this.enemiesList = []
+        let enemiesList = this.enemies.reduce(function (stack, value) {
+            return stack[value] ? stack[value]++ : stack[value] = 1, stack;
+        }, {})
+        Object.keys(enemiesList).forEach((el, e) => {
+            this.enemiesList.push(`${this.enemies[e].type} x${enemiesList[el]}`)
+        })
+        this.enemiesList = this.enemiesList.join(" ")
     },
     update: function () {
         if (player.x - player.radius < 0) {
@@ -541,4 +580,19 @@ function update() {
     screen.follow(player)
     MAP.draw()
     player.draw()
+
+    ctx.beginPath()
+    ctx.fillStyle = "rgba(255,255,255,0.5)"
+    ctx.textAlign = "left"
+    ctx.font = "20px ZaychikRegular"
+    ctx.fillText(`Width: ${MAP.width}, Height: ${MAP.height}`, 10, 25)
+    ctx.fillText(`Zones Count: ${MAP.zonesCount}`, 10, 45)
+    ctx.fillText(`Zones Types: ${MAP.zonesTypes}`, 10, 65)
+    ctx.fillText(`Enemies Count: ${MAP.enemiesCount}`, 10, 85)
+    ctx.fillText(`Enemies Types: ${MAP.enemiesList}`, 10, 105)
+    ctx.closePath()
+    /*screen.drawText(`Width: ${MAP.width}, Height: ${MAP.height}`,
+        10,25,"rgba(255,255,255,0.5)","rgba(0,0,0,0)","20px ZaychikRegular",1,"left")
+    screen.drawText(`Zones Count: ${MAP.zones.length+1}`,
+        10,45,"rgba(255,255,255,0.5)","rgba(0,0,0,0)","20px ZaychikRegular",1,"left")*/
 }
