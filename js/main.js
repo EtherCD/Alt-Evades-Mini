@@ -501,8 +501,8 @@ const MAP = {
             this.zonesTypes.push(`${el} x${count[el]}`)
         })
         this.zonesTypes = this.zonesTypes.join(" ")
-        this.zonesCount = this.zones.length + 1
-        this.enemiesCount = this.enemies.length + 1
+        this.zonesCount = this.zones.length
+        this.enemiesCount = this.enemies.length
         this.enemiesList = []
         let typesArray = []
         for (let i in this.enemies) {
