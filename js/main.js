@@ -412,6 +412,8 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
                 player.x = this.translate.x + 30
             if (this.translate.y != 0)
                 player.y = this.translate.y + 30*/
+            if (this.translate.w == undefined) this.translate.w = 0
+            if (this.translate.h == undefined) this.translate.h = 0
             let side = this.checkSide(p)
             if (side == "left") {
                 p.x = this.translate.x + p.radius + 1 + 60
