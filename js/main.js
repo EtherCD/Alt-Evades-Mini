@@ -1,12 +1,15 @@
 let canvas = document.getElementById("canvas")
 let ctx = canvas.getContext("2d")
+let enemiescolor = document.getElementById("encl").checked
+let playerspeed = document.getElementById("pspeed").value
 
 let screen = {
     offX: 10,
     offY: 10,
-    drawCircle: function (x, y, r, color, stroke) {
+    drawCircle: function (x, y, r, color, stroke, alpha = 1) {
         ctx.beginPath()
         ctx.fillStyle = color
+        ctx.globalAlpha = alpha
         ctx.arc(x - this.xOff, y - this.yOff, r, 0, 2 * Math.PI);
         ctx.fill()
         ctx.lineWidth = 3
@@ -16,9 +19,15 @@ let screen = {
         }
         ctx.closePath()
     },
-    drawRect: function (x, y, w, h, color) {
+    drawRect: function (x, y, w, h, color, stroke) {
+        ctx.beginPath()
         ctx.fillStyle = color
+        ctx.lineWidth = 1
+        ctx.strokeStyle = color
         ctx.fillRect(x - this.xOff, y - this.yOff, w, h)
+        if (stroke)
+            ctx.strokeRect(x - this.xOff, y - this.yOff, w, h)
+        ctx.closePath()
     },
     drawLine: function (x1, y1, x2, y2, color, width) {
         ctx.beginPath()
@@ -52,9 +61,13 @@ let screen = {
 const player = {
     x: 10,
     y: 10,
-    radius: 15,
-    speed: 17,
-    baseSpeed: 17,
+    radius: 15 / 16 * 15,
+    speed: playerspeed,
+    baseSpeed: playerspeed,
+    vel_x: 0,
+    vel_y: 0,
+    acc_x: 0,
+    acc_y: 0,
     movement: {
         "left": false, "right": false,
         "top": false, "down": false,
@@ -68,19 +81,24 @@ const player = {
     noColide: false,
     move: function () {
         let shiftCoef = this.movement.shift ? 0.5 : 1
-        let move = false
         if (!this.movement.mouse) {
             if (this.movement.top) {
-                this.y -= (this.speed / 2) * shiftCoef; move = true
+                this.acc_y = -((this.speed/2) * shiftCoef);
             }
             if (this.movement.down) {
-                this.y += (this.speed / 2) * shiftCoef; move = true
+                this.acc_y = ((this.speed/2) * shiftCoef);
             }
             if (this.movement.left) {
-                this.x -= (this.speed / 2) * shiftCoef; move = true
+                this.acc_x = -((this.speed/2) * shiftCoef);
             }
             if (this.movement.right) {
-                this.x += (this.speed / 2) * shiftCoef; move = true
+                this.acc_x = (this.speed/2) * shiftCoef;
+            }
+            if (!this.movement.right && !this.movement.left) {
+                this.acc_x = 0;
+            }
+            if (!this.movement.top && !this.movement.down) {
+                this.acc_y = 0;
             }
         }
         if (this.movement.mouse) {
@@ -94,11 +112,9 @@ const player = {
                 speedX = (Math.cos(angle) * (Math.min(this.speed, distance * (this.speed / 17)) * shiftCoef) / 2)
                 speedY = (Math.sin(angle) * (Math.min(this.speed, distance * (this.speed / 17)) * shiftCoef) / 2)
             }
-            this.x += speedX
-            this.y += speedY
-            move = true
+            this.acc_x = speedX
+            this.acc_y = speedY
         }
-        return move
     },
     d: function (x1, y1, x2, y2) {
         return Math.sqrt(Math.pow(x1 - x2, 2) + Math.pow(y1 - y2, 2))
@@ -163,7 +179,17 @@ const player = {
             }
         })
     },
-    update: function () {
+    limiter: function (i, j) {
+        if (i < 0) {
+            return -Math.min(Math.abs(i), j)
+        }
+        else if (i > 0) {
+            return Math.min(Math.abs(i), j)
+        } else {
+            return i
+        }
+    },
+    update: function (friction) {
         // effects
         if (this.inSomeEffect["inversivity"]) {
             this.speed = -Math.abs(this.speed)
@@ -183,13 +209,13 @@ const player = {
             this.y += Math.sin((Math.PI * this.inSomeEffect["storm"].angle) * 10) * Math.PI * (0.1 * this.inSomeEffect["storm"].efSpeed)
             this.x += Math.cos((Math.PI * this.inSomeEffect["storm"].angle) * 10) * Math.PI * (0.1 * this.inSomeEffect["storm"].efSpeed)
         }
-        //end effects
-        let move = this.move()
-        if (!move || this.speed > 30) { this.firstAbilityTimer = 0; this.speed = 17 }
-        if (this.movement.z && move) {
-            this.firstAbilityTimer += 1 / 500
-            this.speed += this.firstAbilityTimer
-        }
+        this.move()
+        this.vel_x += this.acc_x
+        this.vel_y += this.acc_y
+        this.vel_x *= 1-friction
+        this.vel_y *= 1-friction
+        this.x += this.limiter(this.vel_x, this.speed*(this.movement.shift?0.5:1))
+        this.y += this.limiter(this.vel_y, this.speed*(this.movement.shift?0.5:1))
         if (this.speed != Math.abs(this.speed)) this.speed = Math.abs(this.speed)
         if (this.inSomeEffect["slowdown"]) delete this.inSomeEffect["slowdown"]
         if (this.inSomeEffect["magnetism"]) delete this.inSomeEffect["magnetism"]
@@ -197,11 +223,12 @@ const player = {
         this.speed = this.baseSpeed
     },
     draw: function () {
+        screen.drawText("Me", canvas.width/2, canvas.height/2-20, "#000", "rgba(0,0,0,0)", "bold 19px Arial", 0,)
         screen.drawCircle(this.x, this.y, this.radius, `rgba(${this.color[0]},${this.color[1]},${this.color[2]},${this.color[3]})`)
     }
 }
 
-function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type }) {
+function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type, aura }) {
     this.handlingType = function (element, side) { if (typeof element == 'string') { if (element.endsWith('t')) { return element.slice(0, -1) * MAP.tile } else if (element.endsWith('tn')) { return side * MAP.tile - (element.slice(0, -2) * MAP.tile) } else return eval(element) } else { return element } }
     let mx = this.handlingType(x1, MAP.width)
     let my = this.handlingType(y1, MAP.height)
@@ -214,8 +241,9 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type }) {
     this.sy = y
     this.sw = w
     this.sh = h
+    this.aura = aura
     this.radius = radius
-    this.speed = speed / 10
+    this.speed = speed / 5
     let ma = Math.random();
     if (angle) { if (typeof angle == 'string') { if (angle.endsWith('deg')) { ma = angle.slice(0, -3) / 360 + 0.25 } } else { ma = angle } }
     this.angle = ma
@@ -244,7 +272,17 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type }) {
         }
     }
     this.draw = function () {
-        screen.drawCircle(this.x, this.y, this.radius, "#787878", true)
+        if (enemiescolor) {
+            let color = etypes[this.type] != undefined && etypes[this.type]["color"] != undefined ? etypes[this.type]["color"] : "#787878"
+            let auraColor = etypes[this.type] != undefined && etypes[this.type]["auraColor"] != undefined ? etypes[this.type]["auraColor"] : color
+            let alpha = etypes[this.type] != undefined && etypes[this.type]["auraAlpha"] != undefined ? etypes[this.type]["auraAlpha"] : 0.05
+            if (this.aura != undefined && this.aura != 0) {
+                screen.drawCircle(this.x, this.y, this.aura, auraColor, false, alpha)
+            }
+            screen.drawCircle(this.x, this.y, this.radius, color, true, 1)
+        } else {
+            screen.drawCircle(this.x, this.y, this.radius, "#787878", true, 1)
+        }
     }
 }
 
@@ -273,7 +311,8 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
                     radius: Enemies[e].radius,
                     speed: Enemies[e].speed,
                     angle: Enemies[e].angle,
-                    type: Enemies[e].type
+                    type: Enemies[e].type,
+                    aura: Enemies[e].aura
                 }))
             }
         }
@@ -367,7 +406,7 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
         }
     }
     this.teleportPlayer = function (p) {
-        if (this.checkOverlap(p.radius, p.x, p.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && this.tpArea != undefined && !player.noColide) {
+        if (this.checkOverlap(p.radius, p.x, p.y, this.x + 1, this.y + 1, this.w - 2, this.h - 2) && this.tpArea != MAP.area && !player.noColide) {
             MAP.changeArea(this.tpArea)
             /*if (this.translate.x != 0)
                 player.x = this.translate.x + 30
@@ -416,7 +455,8 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
             this.y,
             this.w,
             this.h,
-            color)
+            color,
+            this.type == "wall")
         for (let e in MAP.enemies) {
             MAP.enemies[e].draw()
         }
@@ -462,7 +502,7 @@ const MAP = {
     zones: [],
     enemies: [],
     tileColor: "",
-
+    friction: .75,
     zonesCount: 0,
     zonesTypes: [],
     enemiesCount: 0,
@@ -515,6 +555,9 @@ const MAP = {
             this.enemiesList.push(`${el} x${enemiesList[el]}`)
         })
         this.enemiesList = this.enemiesList.join(" ")
+        if (map.datas.friction != undefined) {
+            this.friction = map.datas.friction
+        }
     },
     update: function () {
         if (player.x - player.radius < 0) {
@@ -564,7 +607,7 @@ const MAP = {
             canvas.width / 2, 50, this.arrayMap.datas.title.fillStyle, this.arrayMap.datas.title.strokeStyle)
         if (this.arrayMap[this.area].properties.msg)
             screen.drawText(this.arrayMap[this.area].properties.msg,
-                canvas.width / 2, canvas.height - 100, this.arrayMap.datas.title.fillStyle, this.arrayMap.datas.title.strokeStyle)
+                canvas.width / 2, canvas.height - 100, "#13FF70", "#066B31")
     },
 }
 
@@ -579,7 +622,7 @@ function update() {
     ctx.fillStyle = "#333"
     ctx.fillRect(0, 0, 1280, 720)
 
-    player.update()
+    player.update(MAP.friction)
     MAP.update()
     screen.follow(player)
     MAP.draw()
@@ -595,8 +638,8 @@ function update() {
     ctx.fillText(`Enemies Count: ${MAP.enemiesCount}`, 10, 85)
     ctx.fillText(`Enemies Types: ${MAP.enemiesList}`, 10, 105)
     ctx.closePath()
-    /*screen.drawText(`Width: ${MAP.width}, Height: ${MAP.height}`,
-        10,25,"rgba(255,255,255,0.5)","rgba(0,0,0,0)","20px ZaychikRegular",1,"left")
+    /*screen.drawText(`Vel: x->${Math.floor(player.vel_x)}, y->${Math.floor(player.vel_y)}, Acc: x->${Math.floor(player.acc_x)}, y->${Math.floor(player.acc_y)}`,
+        10,125,"rgba(255,255,255,0.9)","rgba(0,0,0,0)","20px ZaychikRegular",1,"left")
     screen.drawText(`Zones Count: ${MAP.zones.length+1}`,
         10,45,"rgba(255,255,255,0.5)","rgba(0,0,0,0)","20px ZaychikRegular",1,"left")*/
 }

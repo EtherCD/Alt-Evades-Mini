@@ -595,6 +595,221 @@ let map = {
     }
 }
 
+let etypes = {
+    'normal': {
+        "color": '#787878'
+    },
+    'spiral': {
+        "color": '#D1C732'
+    },
+    'dasher': {
+        "color": '#6789EF'
+    },
+    'rush': {
+        "color": "#ecc4ef"
+    },
+    'black': {
+        "color": 'black'
+    },
+    'wall': {
+        "color": '#222222'
+    },
+    'slower': {
+        "color": 'red'
+    },
+    'draining': {
+        "color": 'blue'
+    },
+    'disabler': {
+        "color": '#A87C86',
+        "auraAlpha": 0.5,
+        "auraColor": "rgb(255, 191, 206)"
+    },
+    'superSlower': {
+        "color": '#64C1B9',
+        "auraAlpha": 0.3
+    },
+    'shutter': {
+        "color": '#003c66'
+    },
+    'snow': {
+        "color": "#adf8ff"
+    },
+    'snowWarp': {
+        "color": '#93C1F5'
+    },
+    'sizer': {
+        "color": '#F27743'
+    },
+    'mine': {
+        "color": '#b4b83f'
+    },
+    'sniper': {
+        "color": '#A05353'
+    },
+    'iceSniper': {
+        "color": '#8C01B7'
+    },
+    'iceOctoSniper': {
+        "color": '#4C0094'
+    },
+    'iceAcroSniper': {
+        "color": '#4B0082'
+    },
+    'iceDiagSniper': {
+        "color": '#6d00bd'
+    },
+    'acrossSniper': {
+        "color": '#B95069'
+    },
+    'diagonalSniper': {
+        "color": '#A9203E'
+    },
+    'octoSniper': {
+        "color": '#D3134F'
+    },
+    'growing': {
+        "color": '#70E099'
+    },
+    'changer': {
+        "color": '#565656'
+    },
+    'wine': {
+        "color": '#1E5945'
+    },
+    'bee': {
+        "color": '#A0780A'
+    },
+    'warpe': {
+        "color": '#4E1609'
+    },
+    'invisible': {
+        "color": '#8A7F8E'
+    },
+    'oscillating': {
+        "color": '#869E0F'
+    },
+    'zoning': {
+        "color": '#A03811'
+    },
+    'toning': {
+        "color": '#9B111E'
+    },
+    'beeSniper': {
+        "color": '#846A20'
+    },
+    'beeOctoSniper': {
+        "color": '#704214'
+    },
+    'beeDiagSniper': {
+        "color": '#593315'
+    },
+    'beeAcroSniper': {
+        "color": '#714B23'
+    },
+    'flame': {
+        "color": '#D53E07'
+    },
+    'lava': {
+        "color": '#A8490A'
+    },
+    'crossive': {
+        "color": '#00EB00'
+    },
+    'crossiveSniper': {
+        "color": '#61FF61'
+    },
+    'rapiditySniper': {
+        "color": '#8C01B7'
+    },
+    'shield': {
+        "color": '#29FFC6',
+        "auraAlpha": 0.5
+    },
+    "turret": {
+        "color": "#C90000",
+        "auraColor": "#BEC8DD"
+    },
+    'hell': {
+        "color": '#2e0000'
+    },
+    'pumpkin': {
+        "color": '#ff8d18'
+    },
+    'pull': {
+        "color": '#78148C'
+    },
+    'push': {
+        "color": '#7B9DB2'
+    },
+    'slippery': {
+        "color": '#1AACBF',
+        "auraAlpha": 0.5
+    },
+    'snowHorizontal': {
+        "color": "#adf8ff"
+    },
+    'blackWall': {
+        "color": '#ffff00'
+    },
+    'telper': {
+        "color": "#FFDB58"
+    },
+    'telperSniper': {
+        "color": '#FDEAA8'
+    },
+    'doctor': {
+        "color": '#ff2d0f'
+    },
+    'immuneteric': {
+        "color": '#A5A5A5'
+    },
+    'repulsiveGhost': {
+        "color": '#9DE3C6'
+    },
+    'rapidityGhost': {
+        "color": '#8C01B7'
+    },
+    'disableGhost': {
+        "color": '#F7B7C6'
+    },
+    'stretching': {
+        "color": '#4d0163',
+        "auraAlpha": 0.3
+    },
+    'switcher': {
+        "color": '#FAF46E'
+    },
+    'stepped': {
+        "color": '#B371F2'
+    },
+    'wagging': {
+        "color": '#DD2606'
+    },
+    'ghost': {
+        "color": '#86D7DB'
+    },
+    "toxic": {
+        "color": "#00C700",
+        "auraAlpha": 0.2
+    },
+    "speedSniper": {
+        "color": "#FF9000"
+    },
+    "regenSniper": {
+        "color": "#00CC8E"
+    },
+    "turning": {
+        "color": "#29521A"
+    },
+    "wavy": {
+        "color": "#B11E1F"
+    },
+    "glSizer": {
+        "color": "#A65E2E"
+    }
+}
+
 function loadFileMap(selectedFile) {
     let fr = new FileReader();
     fr.onload = (e) => {

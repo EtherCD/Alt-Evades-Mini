@@ -23,6 +23,49 @@ body {
     transform: translate(-50%, -50%)
 }
 
+#settings {
+    position: absolute;
+    top: 50%;
+    left: 25%;
+    margin-right: -50%;
+    transform: translate(-50%, -50%);
+    width: 15%;
+    height: 15%;
+    text-align: center;
+}
+
+#settings p {
+    margin-bottom: 1%;
+    margin-top: 1%;
+    font-size: 280%;
+}
+
+#settings hr {
+    height: 5%;
+    border: none;
+    background-color: #888;
+}
+
+#settings input {
+    background-color: #323232;
+    border: none;
+    border-radius: 1px;
+}
+
+#settings input[type="checkbox"] {
+    width: 15%;
+    height: 15%;
+    margin-right: -3%;
+}
+
+#settings input[type="number"] {
+    padding-left: 10px;
+    width: 30%;
+    height: 15%;
+    color: #fff;
+    margin-top: 2%;
+}
+
 #centered h1 {
     font-size: 4em
 }
