@@ -244,6 +244,11 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type, aura }) {
     this.aura = aura
     this.radius = radius
     this.speed = speed / 5
+    if (enemiescolor) {
+        this.color = etypes[this.type] != undefined && etypes[this.type]["color"] != undefined ? etypes[this.type]["color"] : "#787878"
+        this.auraColor = etypes[this.type] != undefined && etypes[this.type]["auraColor"] != undefined ? etypes[this.type]["auraColor"] : this.color
+        this.alpha = etypes[this.type] != undefined && etypes[this.type]["auraAlpha"] != undefined ? etypes[this.type]["auraAlpha"]/2.5 : 0.05
+    }
     let ma = Math.random();
     if (angle) { if (typeof angle == 'string') { if (angle.endsWith('deg')) { ma = angle.slice(0, -3) / 360 + 0.25 } } else { ma = angle } }
     this.angle = ma
@@ -273,13 +278,10 @@ function Enemie({ x1, y1, x, y, w, h, radius, speed, angle, type, aura }) {
     }
     this.draw = function () {
         if (enemiescolor) {
-            let color = etypes[this.type] != undefined && etypes[this.type]["color"] != undefined ? etypes[this.type]["color"] : "#787878"
-            let auraColor = etypes[this.type] != undefined && etypes[this.type]["auraColor"] != undefined ? etypes[this.type]["auraColor"] : color
-            let alpha = etypes[this.type] != undefined && etypes[this.type]["auraAlpha"] != undefined ? etypes[this.type]["auraAlpha"] : 0.05
             if (this.aura != undefined && this.aura != 0) {
-                screen.drawCircle(this.x, this.y, this.aura, auraColor, false, alpha)
+                screen.drawCircle(this.x, this.y, this.aura, this.auraColor, false, this.alpha)
             }
-            screen.drawCircle(this.x, this.y, this.radius, color, true, 1)
+            screen.drawCircle(this.x, this.y, this.radius, this.color, true, 1)
         } else {
             screen.drawCircle(this.x, this.y, this.radius, "#787878", true, 1)
         }
@@ -437,7 +439,7 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
     this.draw = function () {
         let color = "#333"
         switch (this.type) {
-            case "spawner": color = "rgba(156,156,156,0.25)"; break;
+            case "spawner": color = "rgba(0,0,0,0)"; break;
             case "slowdown":
                 if (slowdown == Math.abs(slowdown))
                     color = "rgba(220,99,91,0.25)"
@@ -445,7 +447,7 @@ function Zone({ x, y, w, h, type, Enemies, translate, tpArea, slowdown, magnite,
                 break;
             case "inversivity": color = "rgba(167,60,227,0.6)"; break;
             case "storm": color = "rgba(242,165,60,0.6)"; break;
-            case "save": color = "rgba(216,216,216,0.5)"; break;
+            case "save": color = "rgba(195,195,195,0.5)"; break;
             case "magnetism":
                 if (magnite) color = "rgba(255,56,82,0.3)"
                 else color = "rgba(164,150,255,0.3)"
@@ -603,6 +605,12 @@ const MAP = {
             screen.drawLine(g * this.tile + screen.offX - 10, screen.offY - 10, g * this.tile + screen.offX - 10, size.height * this.tile + screen.offY - 10, this.tileColor, 2.5)
         for (let g = 0; g < size.height; g++)
             screen.drawLine(screen.offX - 10, g * this.tile, size.width * this.tile + screen.offX - 10, g * this.tile, this.tileColor, 2.5)
+        screen.drawRect(-1,
+            -1,
+            size.width * this.tile + 1,
+            size.height * this.tile +1,
+            "rgba(90,90,90,0.65)"    
+        )
         for (let zone in this.zones)
             this.zones[zone].draw()
         screen.drawText(this.worldName + `: Area ${this.area}`,
